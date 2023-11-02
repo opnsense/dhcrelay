@@ -41,6 +41,8 @@
 
 #include <sys/queue.h>
 
+#define pledge(a, b)	0
+
 #define	SERVER_PORT	67
 #define	CLIENT_PORT	68
 

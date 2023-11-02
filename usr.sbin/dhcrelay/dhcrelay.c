@@ -43,6 +43,7 @@
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 
+#include <netinet/in.h>
 #include <arpa/inet.h>
 
 #include <net/if.h>
@@ -230,7 +231,11 @@ main(int argc, char *argv[])
 	if (!sp)
 		usage();
 
+#ifdef SO_RTABLE
 	rdomain = get_rdomain(interfaces->name);
+#else
+	(void)rdomain;
+#endif /* SO_RTABLE */
 
 	/* Enable the relay agent option by default for enc0 */
 	if (interfaces->hw_address.htype == HTYPE_IPSEC_TUNNEL)
@@ -256,9 +261,11 @@ main(int argc, char *argv[])
 		if (setsockopt(sp->fd, SOL_SOCKET, SO_REUSEPORT,
 		    &opt, sizeof(opt)) == -1)
 			fatal("setsockopt");
+#ifdef SO_RTABLE
 		if (setsockopt(sp->fd, SOL_SOCKET, SO_RTABLE, &rdomain,
 		    sizeof(rdomain)) == -1)
 			fatal("setsockopt");
+#endif /* SO_RTABLE */
 		if (bind(sp->fd, (struct sockaddr *)&laddr, sizeof laddr) ==
 		    -1)
 			fatal("bind");
@@ -278,9 +285,11 @@ main(int argc, char *argv[])
 		if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEPORT,
 		    &opt, sizeof(opt)) == -1)
 			fatal("setsockopt");
+#ifdef SO_RTABLE
 		if (setsockopt(server_fd, SOL_SOCKET, SO_RTABLE, &rdomain,
 		    sizeof(rdomain)) == -1)
 			fatal("setsockopt");
+#endif /* SO_RTABLE */
 		if (bind(server_fd, (struct sockaddr *)&laddr,
 		    sizeof(laddr)) == -1)
 			fatal("bind");
@@ -845,6 +854,7 @@ relay_agentinfo_remove(struct packet_ctx *pc, struct dhcp_packet *dp,
 	return (endp - startp);
 }
 
+#ifdef SO_RTABLE
 int
 get_rdomain(char *name)
 {
@@ -862,6 +872,7 @@ get_rdomain(char *name)
 	close(s);
 	return rv;
 }
+#endif /* SO_RTABLE */
 
 void
 l2relay(struct interface_info *ip, struct dhcp_packet *dp, int length,

@@ -174,6 +174,7 @@ decode_hw_header(unsigned char *buf, size_t buflen,
 
 	switch (intfhtype) {
 	case HTYPE_IPSEC_TUNNEL:
+#define ENC_HDRLEN 12
 		if (buflen < offset + ENC_HDRLEN + sizeof(*ip))
 			return (-1);
 		offset += ENC_HDRLEN;

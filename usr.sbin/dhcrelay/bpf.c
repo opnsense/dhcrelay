@@ -43,6 +43,7 @@
 #include <sys/types.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
+#include <sys/uio.h>
 
 #include <net/bpf.h>
 #include <net/if.h>
