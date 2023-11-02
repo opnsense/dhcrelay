@@ -43,6 +43,7 @@
 #include <sys/types.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
+#include <sys/uio.h>
 
 #include <net/bpf.h>
 #include <net/if.h>
@@ -198,14 +199,18 @@ if_register_receive(struct interface_info *info)
 		fatal("Can't install write filter program");
 
 	/* Only get input packets. */
+#define BPF_DIRECTION_OUT	BPF_D_IN
 	flag = BPF_DIRECTION_OUT;
+#define BIOCSDIRFILT	BIOCSDIRECTION
 	if (ioctl(info->rfdesc, BIOCSDIRFILT , &flag) == -1)
 		fatal("Can't set BPF direction capture");
 
+#ifdef BIOCSFILDROP
 	/* Drop them so they don't go up in the network stack. */
 	flag = BPF_FILDROP_CAPTURE;
 	if (ioctl(info->rfdesc, BIOCSFILDROP, &flag) == -1)
 		fatal("Can't set BPF filter drop");
+#endif /* BIOCSFILDROP */
 
 	/* make sure these settings cannot be changed after dropping privs */
 	if (ioctl(info->rfdesc, BIOCLOCK) == -1)

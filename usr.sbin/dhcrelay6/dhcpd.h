@@ -45,6 +45,8 @@
 
 #include <sys/queue.h>
 
+#define pledge(a, b)	0
+
 #define DHCRELAY6_USER	"_dhcp"
 
 /* Maximum size of client hardware address. */

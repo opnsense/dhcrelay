@@ -5,9 +5,8 @@
 SRCS=	dhcrelay6.c dispatch.c log.c bpf.c packet.c
 PROG=	dhcrelay6
 MAN=	dhcrelay6.8
+WARNS=	3
 
-CFLAGS+=-Wall -Wextra
-CFLAGS+=-Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations
-CFLAGS+=-Wshadow -Wpointer-arith -Wsign-compare
+CLEANFILES=	.depend*
 
 .include <bsd.prog.mk>

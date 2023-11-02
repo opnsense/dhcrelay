@@ -81,7 +81,7 @@ struct in6_addr		 in6alldhcp = {
 	{{ 0xff, 0x05, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x01, 0, 0x03 }}
 };
 
-__dead void usage(void);
+__dead2 void usage(void);
 struct server_list *parse_destination(const char *);
 int	 rdaemon(int);
 void	 relay6_setup(void);
@@ -115,7 +115,7 @@ char			*remote_data;
 size_t			 remote_datalen;
 enum dhcp_relay_mode	 drm = DRM_LAYER3;
 
-__dead void
+__dead2 void
 usage(void)
 {
 	extern char	*__progname;

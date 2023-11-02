@@ -168,8 +168,7 @@ setup_iflist(void)
 
 			/* Skip non ethernet interfaces. */
 			if (ifi->ifi_type != IFT_ETHER &&
-			    ifi->ifi_type != IFT_ENC &&
-			    ifi->ifi_type != IFT_CARP) {
+			    ifi->ifi_type != IFT_ENC) {
 				TAILQ_REMOVE(&intflist, intf, entry);
 				free(intf);
 				continue;
