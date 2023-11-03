@@ -184,6 +184,8 @@ setup_iflist(void)
 
 	freeifaddrs(ifap);
 
+	/* XXX we could still end up with an intf->index == 0 */
+
 	/*
 	 * Generate link-local IPv6 address for interfaces without it.
 	 *
