@@ -101,7 +101,7 @@ iflist_getbyname(const char *name)
 void
 setup_iflist(void)
 {
-	struct interface_info		*intf;
+	struct interface_info		*intf, *intf_temp;
 	struct sockaddr_dl		*sdl;
 	struct ifaddrs			*ifap, *ifa;
 	struct if_data			*ifi;
@@ -184,8 +184,6 @@ setup_iflist(void)
 
 	freeifaddrs(ifap);
 
-	/* XXX we could still end up with an intf->index == 0 */
-
 	/*
 	 * Generate link-local IPv6 address for interfaces without it.
 	 *
@@ -195,7 +193,17 @@ setup_iflist(void)
 	 * to relay packets back. This is only used for layer 2 relaying
 	 * when the interface might not have an address.
 	 */
-	TAILQ_FOREACH(intf, &intflist, entry) {
+	TAILQ_FOREACH_SAFE(intf, &intflist, entry, intf_temp) {
+		/*
+		 * Remove devices that did not have their layer 2
+		 * scanned leading to an invalid interface index.
+		 */
+		if (!intf->index) {
+			TAILQ_REMOVE(&intflist, intf, entry);
+			free(intf);
+			continue;
+		}
+
 		if (memcmp(&intf->linklocal, &in6addr_any,
 		    sizeof(in6addr_any)) != 0)
 			continue;
