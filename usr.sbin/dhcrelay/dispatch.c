@@ -104,6 +104,7 @@ setup_iflist(void)
 	struct interface_info		*intf, *intf_temp;
 	struct sockaddr_dl		*sdl;
 	struct ifaddrs			*ifap, *ifa;
+	struct if_data			*ifi;
 	struct sockaddr_in		*sin;
 	struct sockaddr_in6		*sin6;
 
@@ -134,11 +135,24 @@ setup_iflist(void)
 
 		if (ifa->ifa_addr->sa_family == AF_LINK) {
 			sdl = (struct sockaddr_dl *)ifa->ifa_addr;
+			ifi = (struct if_data *)ifa->ifa_data;
+
 			intf->hw_address.htype = HTYPE_ETHER; /* XXX */
 			intf->index = sdl->sdl_index;
-			intf->hw_address.hlen = sdl->sdl_alen;
-			memcpy(intf->hw_address.haddr,
-			    LLADDR(sdl), sdl->sdl_alen);
+			switch (ifi->ifi_type) {
+			case IFT_ETHER:
+			case IFT_XETHER:
+			case IFT_L2VLAN:
+			case IFT_BRIDGE:
+			case IFT_IEEE8023ADLAG:
+				intf->hw_address.hlen = sdl->sdl_alen;
+				memcpy(intf->hw_address.haddr,
+				    LLADDR(sdl), sdl->sdl_alen);
+				break;
+			default:
+				/* unsupported, hlen remains zero */
+				break;
+			}
 		} else if (ifa->ifa_addr->sa_family == AF_INET) {
 			sin = (struct sockaddr_in *)ifa->ifa_addr;
 			if (sin->sin_addr.s_addr == htonl(INADDR_LOOPBACK) ||
@@ -178,8 +192,7 @@ setup_iflist(void)
 	 * when the interface might not have an address.
 	 */
 	TAILQ_FOREACH_SAFE(intf, &intflist, entry, intf_temp) {
-		/* XXX not optimal but also keeps e.g. bridges */
-		if (intf->hw_address.hlen != ETHER_ADDR_LEN) {
+		if (!intf->hw_address.hlen) {
 			TAILQ_REMOVE(&intflist, intf, entry);
 			free(intf);
 			continue;
