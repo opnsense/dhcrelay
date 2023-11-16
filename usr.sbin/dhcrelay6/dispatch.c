@@ -133,7 +133,6 @@ setup_iflist(void)
 	struct interface_info		*intf, *intf_temp;
 	struct sockaddr_dl		*sdl;
 	struct ifaddrs			*ifap, *ifa;
-	struct if_data			*ifi;
 	struct sockaddr_in		*sin;
 	struct sockaddr_in6		*sin6;
 
@@ -164,17 +163,6 @@ setup_iflist(void)
 
 		if (ifa->ifa_addr->sa_family == AF_LINK) {
 			sdl = (struct sockaddr_dl *)ifa->ifa_addr;
-			ifi = (struct if_data *)ifa->ifa_data;
-
-			/* Skip non ethernet interfaces. */
-			if (ifi->ifi_type != IFT_ETHER &&
-			    ifi->ifi_type != IFT_L2VLAN &&
-			    ifi->ifi_type != IFT_ENC) {
-				TAILQ_REMOVE(&intflist, intf, entry);
-				free(intf);
-				continue;
-			}
-
 			intf->index = sdl->sdl_index;
 			intf->hw_address.hlen = sdl->sdl_alen;
 			memcpy(intf->hw_address.haddr,
@@ -218,11 +206,8 @@ setup_iflist(void)
 	 * when the interface might not have an address.
 	 */
 	TAILQ_FOREACH_SAFE(intf, &intflist, entry, intf_temp) {
-		/*
-		 * Remove devices that did not have their layer 2
-		 * scanned leading to an invalid interface index.
-		 */
-		if (!intf->index) {
+		/* XXX not optimal but also keeps e.g. bridges */
+		if (intf->hw_address.hlen != ETHER_ADDR_LEN) {
 			TAILQ_REMOVE(&intflist, intf, entry);
 			free(intf);
 			continue;
