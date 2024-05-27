@@ -432,7 +432,9 @@ receive_packet(struct interface_info *interface, unsigned char *buf,
 		 * do is drop it.
 		 */
 		if (hdr.bh_caplen != hdr.bh_datalen) {
-			interface->rbuf_offset += hdr.bh_caplen;
+			interface->rbuf_offset =
+			    BPF_WORDALIGN(interface->rbuf_offset +
+			    hdr.bh_caplen);
 			continue;
 		}
 
@@ -447,7 +449,9 @@ receive_packet(struct interface_info *interface, unsigned char *buf,
 		 * skip this packet.
 		 */
 		if (offset < 0) {
-			interface->rbuf_offset += hdr.bh_caplen;
+			interface->rbuf_offset =
+			    BPF_WORDALIGN(interface->rbuf_offset +
+			    hdr.bh_caplen);
 			continue;
 		}
 
@@ -457,7 +461,9 @@ receive_packet(struct interface_info *interface, unsigned char *buf,
 
 		/* If the IP or UDP checksum was bad, skip the packet... */
 		if (offset < 0) {
-			interface->rbuf_offset += hdr.bh_caplen;
+			interface->rbuf_offset =
+			    BPF_WORDALIGN(interface->rbuf_offset +
+			    hdr.bh_caplen);
 			continue;
 		}
 
@@ -470,14 +476,18 @@ receive_packet(struct interface_info *interface, unsigned char *buf,
 		 * life, though).
 		 */
 		if (hdr.bh_caplen > len) {
-			interface->rbuf_offset += hdr.bh_caplen;
+			interface->rbuf_offset =
+			    BPF_WORDALIGN(interface->rbuf_offset +
+			    hdr.bh_caplen);
 			continue;
 		}
 
 		/* Copy out the data in the packet... */
 		memcpy(buf, interface->rbuf + interface->rbuf_offset,
 		    hdr.bh_caplen);
-		interface->rbuf_offset += hdr.bh_caplen;
+		interface->rbuf_offset =
+		    BPF_WORDALIGN(interface->rbuf_offset +
+		    hdr.bh_caplen);
 		return (hdr.bh_caplen);
 	} while (!length);
 	return (0);
