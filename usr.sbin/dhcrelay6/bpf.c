@@ -360,14 +360,6 @@ receive_packet(struct interface_info *interface, unsigned char *buf,
 		 * do is drop it.
 		 */
 		if (hdr.bh_caplen != hdr.bh_datalen) {
-			/*
-			 * Always bail when we would end up in an endless loop.
-			 * if both rbuf_offset and rbuf_len do not change, will will asess the same
-			 * situation in the next iteration.
-			 */
-			if (hdr.bh_caplen == 0)
-				break;
-
 			interface->rbuf_offset += hdr.bh_hdrlen =
 			    hdr.bh_caplen;
 			continue;
