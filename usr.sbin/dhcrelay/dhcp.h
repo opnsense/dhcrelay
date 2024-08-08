@@ -54,8 +54,6 @@
 /* The option/sub-option header length. */
 #define DHCP_OPTION_HDR_LEN	2
 
-#define BOOTP_MIN_LEN		300
-
 struct dhcp_packet {
 	u_int8_t  op;		/* Message opcode/type */
 	u_int8_t  htype;	/* Hardware addr type (see net/if_types.h) */

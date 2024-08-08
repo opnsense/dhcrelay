@@ -544,7 +544,16 @@ got_response(struct protocol *l)
 	if (result == 0)
 		return;
 
-	if (result < BOOTP_MIN_LEN) {
+	/*
+	 * If we didn't at least get the fixed portion of the BOOTP
+	 * packet, drop the packet.
+	 * Previously we allowed packets with no sname or filename
+	 * as we were aware of at least one client that did.  But
+	 * a bug caused short packets to not work and nobody has
+	 * complained, it seems rational to tighten up that
+	 * restriction.
+	 */
+	if (result < DHCP_FIXED_NON_UDP)
 		log_info("Discarding packet with invalid size.");
 		return;
 	}
