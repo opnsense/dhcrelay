@@ -553,7 +553,7 @@ got_response(struct protocol *l)
 	 * complained, it seems rational to tighten up that
 	 * restriction.
 	 */
-	if (result < DHCP_FIXED_NON_UDP)
+	if (result < DHCP_FIXED_NON_UDP) {
 		log_info("Discarding packet with invalid size.");
 		return;
 	}
